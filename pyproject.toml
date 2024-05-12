@@ -24,8 +24,8 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "~3.7"
-pillow = "~9.1"
+python = "~3.11"
+pillow = "~9.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
