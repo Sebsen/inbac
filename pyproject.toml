@@ -24,14 +24,14 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
-pillow = "^8.0"
+python = "~3.7"
+pillow = "~9.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
 pylint = "^2.6"
 autopep8 = "^1.5"
-pyinstaller = "^4.1"
+pyinstaller = "~4.5"
 macholib = "^1.14"
 pywin32-ctypes = "^0.2.0"
 pefile = "^2019.4.18"
