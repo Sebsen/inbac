@@ -69,7 +69,7 @@ class Controller():
             self.view.image_canvas.winfo_height())
         displayed_image: Image = self.model.current_image.copy()
         displayed_image.thumbnail(
-            self.model.canvas_image_dimensions, Image.ANTIALIAS)
+            self.model.canvas_image_dimensions, Image.LANCZOS)
         self.model.displayed_image = ImageTk.PhotoImage(displayed_image)
         self.model.canvas_image = self.view.display_image(
             self.model.displayed_image)
