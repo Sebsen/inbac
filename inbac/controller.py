@@ -168,7 +168,6 @@ class Controller():
                 new_filename),
             self.model.args.image_format,
             quality=self.model.args.image_quality)
-        self.clear_selection_box()
         return True
 
     def rotate_image(self):
