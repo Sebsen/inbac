@@ -23,7 +23,9 @@ class View():
 
     def bind_events(self):
         self.master.bind('z', self.save_next)
-        self.master.bind('x', self.save)
+        self.master.bind('<space>', self.save)
+        self.master.bind('x', self.save_next)
+        self.master.bind('y', self.save)
         self.master.bind('c', self.rotate_image)
         self.master.bind('r', self.rotate_aspect_ratio)
         self.master.bind('<Left>', self.previous_image)
