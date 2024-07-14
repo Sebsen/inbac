@@ -217,17 +217,17 @@ class Controller():
 
     @staticmethod
     def find_available_name(directory: str, filename: str) -> str:
+        crop_suffix: str = '_crop'
         name, extension = os.path.splitext(filename)
-        if not os.path.isfile(os.path.join(directory, filename)):
-            return filename
-        for num in itertools.count(2):
+        for num in itertools.count(1):
             if not os.path.isfile(
                 os.path.join(
                     directory,
                     name +
+                    crop_suffix +
                     str(num) +
                     extension)):
-                return name + str(num) + extension
+                return name + crop_suffix + str(num) + extension
 
     @staticmethod
     def get_selection_box_for_aspect_ratio(selection_box: Tuple[int,
