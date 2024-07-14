@@ -24,19 +24,31 @@ Left Arrow or Middle Mouse Button - go to previous picture\n"""
         nargs="?",
         help="output directory (defaults to folder crops in input directory)",
         default=argparse.SUPPRESS)
-    parser.add_argument("-a", "--aspect_ratio", type=int, nargs=2,
-                        help="selection should have specified aspect ratio")
+    parser.add_argument(
+        "-a",
+        "--aspect_ratio",
+        type=int,
+        nargs=2,
+        help="selection should have specified aspect ratio",
+        default=[
+            9,
+            16
+        ])
     parser.add_argument(
         "-r",
         "--resize",
         type=int,
         nargs=2,
-        help="cropped image will be resized to specified width and height")
+        help="cropped image will be resized to specified width and height",
+        default=[
+            1080,
+            1920
+        ])
     parser.add_argument(
         "-s",
         "--selection_box_color",
-        help="color of the selection box (default is black)",
-        default="black")
+        help="color of the selection box (default is yellow)",
+        default="yellow")
     parser.add_argument(
         "-w",
         "--window_size",

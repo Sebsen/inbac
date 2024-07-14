@@ -189,7 +189,7 @@ class View():
             self.controller.model.args.selection_box_color = settings.selection_box_color_choices[settings.selection_box_color_listbox.curselection()[
                 0]]
         else:
-            self.controller.model.args.selection_box_color = "black"
+            self.controller.model.args.selection_box_color = "yellow"
         settings_window.destroy()
 
     def cancel_settings(self, settings_window: Toplevel):
