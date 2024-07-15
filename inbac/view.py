@@ -7,7 +7,7 @@ import inbac
 
 
 class View():
-    def __init__(self, master: Tk, initial_window_size: Tuple[int, int]):
+    def __init__(self, master: Tk, initial_window_size: Tuple[int, int], no_fullscreen: bool):
         self.master: Tk = master
         self.frame: Frame = tk.Frame(self.master, relief=tk.FLAT)
         self.frame.pack(fill=tk.BOTH, expand=tk.YES)
@@ -15,6 +15,9 @@ class View():
         self.image_canvas.pack(fill=tk.BOTH, expand=tk.YES)
         self.master.geometry(
             str(initial_window_size[0]) + "x" + str(initial_window_size[1]))
+        # Maximize window to achieve full screen (-> default behaviour unless -nfs is provided in command line arguments)
+        if not no_fullscreen:
+            self.master.state('zoomed') 
         self.master.update()
         self.controller = None
 

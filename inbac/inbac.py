@@ -13,7 +13,7 @@ from inbac.controller import Controller
 class Application():
     def __init__(self, args: Namespace, master: Tk):
         self.model: Model = Model(args)
-        self.view: View = View(master, args.window_size)
+        self.view: View = View(master, args.window_size, args.no_fullscreen)
 
         if args.input_dir is None:
             args.input_dir = filedialog.askdirectory(parent=master)

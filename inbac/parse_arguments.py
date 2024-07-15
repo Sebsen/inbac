@@ -62,6 +62,11 @@ Left Arrow or Middle Mouse Button - go to previous picture\n"""
                         help="define the croped image format")
     parser.add_argument("-q", "--image_quality", type=int,
                         help="define the croped image quality", default=100)
+    parser.add_argument(
+        '-nfs',
+        '--no-fullscreen',
+        action='store_true',
+         help="suppress starting the application in full screen mode")
 
     args = parser.parse_args()
 
