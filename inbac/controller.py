@@ -87,7 +87,7 @@ class Controller():
 
     def update_selection_box(self):
         selected_box: Tuple[int, int, int, int] = self.get_selected_box(
-            self.model.press_coord, self.model.move_coord, self.model.args.aspect_ratio)
+            self.model.canvas_image_dimensions, self.model.press_coord, self.model.move_coord, self.model.args.aspect_ratio)
 
         if self.model.selection_box is None:
             self.model.selection_box = self.view.create_rectangle(
@@ -264,7 +264,8 @@ class Controller():
         return tuple(selection_box)
 
     @staticmethod
-    def get_selected_box(mouse_press_coord: Tuple[int,
+    def get_selected_box(image_dimensions: Tuple[int, int],
+                         mouse_press_coord: Tuple[int,
                                                   int],
                          mouse_move_coord: Tuple[int,
                                                  int],
@@ -273,14 +274,20 @@ class Controller():
                                                                       int,
                                                                       int,
                                                                       int]:
-        selection_top_left_x: int = min(
-            mouse_press_coord[0], mouse_move_coord[0])
-        selection_top_left_y: int = min(
-            mouse_press_coord[1], mouse_move_coord[1])
-        selection_bottom_right_x: int = max(
-            mouse_press_coord[0], mouse_move_coord[0])
-        selection_bottom_right_y: int = max(
-            mouse_press_coord[1], mouse_move_coord[1])
+        
+        # Ensure new coordinates of selection box are and stay within image dimensions
+        selection_top_left_x: int = max(                                                        # Top left x min 0
+                min(mouse_press_coord[0], mouse_move_coord[0]), 0
+            )
+        selection_top_left_y: int = max(                                                        # Top left y min 0
+                min(mouse_press_coord[1], mouse_move_coord[1]), 0
+            )
+        selection_bottom_right_x: int = min(                                                    # Bottom right x max $image.width
+                max(mouse_press_coord[0], mouse_move_coord[0]), image_dimensions[0]
+            )
+        selection_bottom_right_y: int = min(                                                    # Bottom right y max $image.width
+                max(mouse_press_coord[1], mouse_move_coord[1]), image_dimensions[1]
+            )
         selection_box: Tuple[int,
                              int,
                              int,
