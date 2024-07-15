@@ -227,8 +227,27 @@ class View():
             self,
             obj: Any,
             offset_x: int,
-            offset_y: int):
-        self.image_canvas.move(obj, offset_x, offset_y)
+            offset_y: int,
+            min_x: int, 
+            max_x: int, 
+            min_y: int, 
+            max_y: int):
+        # Get current coordinates of the object
+        current_coords = self.image_canvas.coords(obj)
+        if not current_coords:
+            return  # Object does not exist or has no coordinates
+        
+        # Calculate proposed new coordinates
+        new_x0 = current_coords[0] + offset_x
+        new_y0 = current_coords[1] + offset_y
+        new_x1 = current_coords[2] + offset_x
+        new_y1 = current_coords[3] + offset_y
+
+        # Check if new coordinates are within bounds
+        if (min_x <= new_x0 <= max_x and min_x <= new_x1 <= max_x and
+            min_y <= new_y0 <= max_y and min_y <= new_y1 <= max_y):
+            # Move the object
+            self.image_canvas.move(obj, offset_x, offset_y)
 
     def enable_selection_mode(self, event: Event = None):
         self.controller.model.enabled_selection_mode = True

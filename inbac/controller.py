@@ -118,8 +118,13 @@ class Controller():
         if self.model.box_selected:
             x_delta: int = self.model.move_coord[0] - prev_move_coord[0]
             y_delta: int = self.model.move_coord[1] - prev_move_coord[1]
+
+            min_x = 0
+            max_x = self.model.canvas_image_dimensions[0]
+            min_y = 0
+            max_y = self.model.canvas_image_dimensions[1]
             self.view.move_canvas_object_by_offset(
-                self.model.selection_box, x_delta, y_delta)
+                self.model.selection_box, x_delta, y_delta, min_x, max_x, min_y, max_y)
         else:
             self.update_selection_box()
 
