@@ -4,7 +4,6 @@ from tkinter import Tk, Frame, Canvas, Event, Menu, messagebox, filedialog, Topl
 from typing import Tuple, Any
 from PIL.ImageTk import PhotoImage
 import inbac
-from inbac.controller import Controller
 
 
 class View():
@@ -20,7 +19,7 @@ class View():
         if not no_fullscreen:
             self.master.state('zoomed') 
         self.master.update()
-        self.controller: Controller = None
+        self.controller = None
 
         self.bind_events()
         self.create_menu()
