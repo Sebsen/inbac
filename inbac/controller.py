@@ -85,16 +85,38 @@ class Controller():
             self.view.remove_from_canvas(self.model.selection_box)
             self.model.selection_box = None
 
+        # Also clear overlays, which can be considered being part of the selection box itself (-> created and deleted together)
+        if self.model.overlay_top is not None:
+            self.view.remove_from_canvas(self.model.overlay_top)
+            self.model.overlay_top = None
+
+        if self.model.overlay_bottom is not None:
+            self.view.remove_from_canvas(self.model.overlay_bottom)
+            self.model.overlay_bottom = None
+        
+        if self.model.overlay_left is not None:
+            self.view.remove_from_canvas(self.model.overlay_left)
+            self.model.overlay_left = None
+        
+        if self.model.overlay_right is not None:
+            self.view.remove_from_canvas(self.model.overlay_right)
+            self.model.overlay_right = None
+
     def update_selection_box(self):
         selected_box: Tuple[int, int, int, int] = self.get_selected_box(
             self.model.canvas_image_dimensions, self.model.press_coord, self.model.move_coord, self.model.args.aspect_ratio)
 
         if self.model.selection_box is None:
             self.model.selection_box = self.view.create_rectangle(
-                selected_box, self.model.args.selection_box_color)
+                                            selected_box, self.model.args.selection_box_color)
+            
+            # Create overlays
+            self.create_overlays()
         else:
             self.view.change_canvas_object_coords(
-                self.model.selection_box, selected_box)
+                     self.model.selection_box, selected_box)
+            # Update the overlay rectangles
+            self.update_overlays(selected_box[0], selected_box[1], selected_box[2], selected_box[3])
 
     def stop_selection(self):
         self.model.box_selected = False
@@ -119,12 +141,30 @@ class Controller():
             x_delta: int = self.model.move_coord[0] - prev_move_coord[0]
             y_delta: int = self.model.move_coord[1] - prev_move_coord[1]
 
+            selected_box: Tuple[int, int, int, int] = self.view.get_canvas_object_coords(
+                self.model.selection_box)
+
+            # The image bounds
             min_x = 0
             max_x = self.model.canvas_image_dimensions[0]
             min_y = 0
             max_y = self.model.canvas_image_dimensions[1]
-            self.view.move_canvas_object_by_offset(
-                self.model.selection_box, x_delta, y_delta, min_x, max_x, min_y, max_y)
+
+            # Calculate proposed new coordinates
+            new_x0 = selected_box[0] + x_delta
+            new_y0 = selected_box[1] + y_delta
+            new_x1 = selected_box[2] + x_delta
+            new_y1 = selected_box[3] + y_delta
+
+            # Check if new coordinates are within bounds
+            if (min_x <= new_x0 <= max_x and min_x <= new_x1 <= max_x and
+                min_y <= new_y0 <= max_y and min_y <= new_y1 <= max_y):
+
+                self.view.move_canvas_object_by_offset(
+                        self.model.selection_box, x_delta, y_delta)
+            
+                # Update the overlay rectangles
+                self.update_overlays(new_x0, new_y0, new_x1, new_y1)
         else:
             self.update_selection_box()
 
@@ -186,6 +226,30 @@ class Controller():
         if self.model.args.aspect_ratio is not None:
             self.model.args.aspect_ratio = (
                 int(self.model.args.aspect_ratio[1]), int(self.model.args.aspect_ratio[0]))
+
+    
+    def create_overlays(self):
+        if self.model.overlay_top:
+            self.view.remove_from_canvas(self.model.overlay_top)
+        if self.model.overlay_bottom:
+            self.view.remove_from_canvas(self.model.overlay_bottom)
+        if self.model.overlay_left:
+            self.view.remove_from_canvas(self.model.overlay_left)
+        if self.model.overlay_right:
+            self.view.remove_from_canvas(self.model.overlay_right)
+
+        image_dimensions = self.model.canvas_image_dimensions
+        self.model.overlay_top = self.view.create_overlay((0, 0, image_dimensions[0], 0))
+        self.model.overlay_bottom = self.view.create_overlay((0, image_dimensions[1], image_dimensions[0], image_dimensions[1]))
+        self.model.overlay_left = self.view.create_overlay((0, 0, 0, image_dimensions[1]))
+        self.model.overlay_right = self.view.create_overlay((image_dimensions[0], 0, image_dimensions[0], image_dimensions[1]))
+
+    def update_overlays(self, left_x, top_y, right_x, bottom_y):
+        image_dimensions = self.model.canvas_image_dimensions
+        self.view.change_canvas_overlay_coords(self.model.overlay_top, (0, 0, image_dimensions[0], top_y))
+        self.view.change_canvas_overlay_coords(self.model.overlay_bottom, (0, bottom_y, image_dimensions[0], image_dimensions[1]))
+        self.view.change_canvas_overlay_coords(self.model.overlay_left, (0, top_y, left_x, bottom_y))
+        self.view.change_canvas_overlay_coords(self.model.overlay_right, (right_x, top_y, image_dimensions[0], bottom_y))
 
     @staticmethod
     def calculate_canvas_image_dimensions(image_width: int,

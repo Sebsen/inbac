@@ -216,9 +216,16 @@ class View():
     def create_rectangle(
             self, box: Tuple[int, int, int, int], outline_color: str) -> Any:
         return self.image_canvas.create_rectangle(box, outline=outline_color)
+    
+    def create_overlay(
+            self, box: Tuple[int, int, int, int]) -> Any:
+        return self.image_canvas.create_rectangle(box, outline="", fill="black", stipple="gray25")
 
     def change_canvas_object_coords(self, obj: Any, coords: Tuple[int, int]):
         self.image_canvas.coords(obj, coords)
+
+    def change_canvas_overlay_coords(self, obj: Any, coords: Tuple[int, int, int, int]):
+        self.image_canvas.coords(obj, coords[0], coords[1], coords[2], coords[3])
 
     def get_canvas_object_coords(self, obj: Any) -> Any:
         return self.image_canvas.coords(obj)
@@ -227,26 +234,7 @@ class View():
             self,
             obj: Any,
             offset_x: int,
-            offset_y: int,
-            min_x: int, 
-            max_x: int, 
-            min_y: int, 
-            max_y: int):
-        # Get current coordinates of the object
-        current_coords = self.image_canvas.coords(obj)
-        if not current_coords:
-            return  # Object does not exist or has no coordinates
-        
-        # Calculate proposed new coordinates
-        new_x0 = current_coords[0] + offset_x
-        new_y0 = current_coords[1] + offset_y
-        new_x1 = current_coords[2] + offset_x
-        new_y1 = current_coords[3] + offset_y
-
-        # Check if new coordinates are within bounds
-        if (min_x <= new_x0 <= max_x and min_x <= new_x1 <= max_x and
-            min_y <= new_y0 <= max_y and min_y <= new_y1 <= max_y):
-            # Move the object
+            offset_y: int):
             self.image_canvas.move(obj, offset_x, offset_y)
 
     def enable_selection_mode(self, event: Event = None):

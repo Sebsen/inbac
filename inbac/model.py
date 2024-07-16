@@ -15,6 +15,10 @@ class Model():
         self.canvas_image: Optional[Any] = None
         self.canvas_image_dimensions: Tuple[int, int] = (0, 0)
         self.current_image: Optional[Image] = None
+        self.overlay_top: Optional[Any] = None
+        self.overlay_bottom: Optional[Any] = None
+        self.overlay_left: Optional[Any] = None
+        self.overlay_right: Optional[Any] = None
         self.enabled_selection_mode: bool = False
         self.box_selected: bool = False
         self.current_file: int = 0
