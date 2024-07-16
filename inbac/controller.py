@@ -234,7 +234,8 @@ class Controller():
                 return name + crop_suffix + str(num) + extension
 
     @staticmethod
-    def get_selection_box_for_aspect_ratio(selection_box: Tuple[int,
+    def get_selection_box_for_aspect_ratio(image_dimensions: Tuple[int, int],
+                                           selection_box: Tuple[int,
                                                                 int,
                                                                 int,
                                                                 int],
@@ -252,14 +253,18 @@ class Controller():
         if float(width) / float(height) > aspect_ratio:
             height = round(width / aspect_ratio)
             if mouse_move_coord[1] > mouse_press_coord[1]:
+                # Mouse moved downwards
                 selection_box[3] = selection_box[1] + height
             else:
+                # Mouse moved upwards
                 selection_box[1] = selection_box[3] - height
         else:
             width = round(height * aspect_ratio)
             if mouse_move_coord[0] > mouse_press_coord[0]:
+                # Mouse moved right
                 selection_box[2] = selection_box[0] + width
             else:
+                # Mouse moved left
                 selection_box[0] = selection_box[2] - width
         return tuple(selection_box)
 
@@ -301,7 +306,7 @@ class Controller():
                 aspect_ratio[0]) / float(aspect_ratio[1])
             try:
                 selection_box: Tuple[int, int, int, int] = Controller.get_selection_box_for_aspect_ratio(
-                    selection_box, aspect_ratio, mouse_press_coord, mouse_move_coord)
+                    image_dimensions, selection_box, aspect_ratio, mouse_press_coord, mouse_move_coord)
             except ZeroDivisionError:
                 pass
 
