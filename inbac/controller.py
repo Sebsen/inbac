@@ -234,41 +234,6 @@ class Controller():
                 return name + crop_suffix + str(num) + extension
 
     @staticmethod
-    def get_selection_box_for_aspect_ratio(image_dimensions: Tuple[int, int],
-                                           selection_box: Tuple[int,
-                                                                int,
-                                                                int,
-                                                                int],
-                                           aspect_ratio: float,
-                                           mouse_press_coord: Tuple[int,
-                                                                    int],
-                                           mouse_move_coord: Tuple[int,
-                                                                   int]) -> Tuple[int,
-                                                                                  int,
-                                                                                  int,
-                                                                                  int]:
-        selection_box: List[int] = list(selection_box)
-        width: int = selection_box[2] - selection_box[0]
-        height: int = selection_box[3] - selection_box[1]
-        if float(width) / float(height) > aspect_ratio:
-            height = round(width / aspect_ratio)
-            if mouse_move_coord[1] > mouse_press_coord[1]:
-                # Mouse moved downwards
-                selection_box[3] = selection_box[1] + height
-            else:
-                # Mouse moved upwards
-                selection_box[1] = selection_box[3] - height
-        else:
-            width = round(height * aspect_ratio)
-            if mouse_move_coord[0] > mouse_press_coord[0]:
-                # Mouse moved right
-                selection_box[2] = selection_box[0] + width
-            else:
-                # Mouse moved left
-                selection_box[0] = selection_box[2] - width
-        return tuple(selection_box)
-
-    @staticmethod
     def get_selected_box(image_dimensions: Tuple[int, int],
                          mouse_press_coord: Tuple[int,
                                                   int],
@@ -280,35 +245,67 @@ class Controller():
                                                                       int,
                                                                       int]:
         
-        # Ensure new coordinates of selection box are and stay within image dimensions
-        selection_top_left_x: int = max(                                                        # Top left x min 0
-                min(mouse_press_coord[0], mouse_move_coord[0]), 0
-            )
-        selection_top_left_y: int = max(                                                        # Top left y min 0
-                min(mouse_press_coord[1], mouse_move_coord[1]), 0
-            )
-        selection_bottom_right_x: int = min(                                                    # Bottom right x max $image.width
-                max(mouse_press_coord[0], mouse_move_coord[0]), image_dimensions[0]
-            )
-        selection_bottom_right_y: int = min(                                                    # Bottom right y max $image.width
-                max(mouse_press_coord[1], mouse_move_coord[1]), image_dimensions[1]
-            )
+        current_x: int = mouse_move_coord[0]
+        current_y: int = mouse_move_coord[1]
+
+        start_x: int = mouse_press_coord[0]
+        start_y: int = mouse_press_coord[1]
+
+        # Calculate the width and height
+        width: int = abs(current_x - start_x)
+        height: int = abs(current_y - start_y)
+
+        if aspect_ratio is not None:
+            # Calculate the height maintaining the aspect ratio
+            height: int = (width / aspect_ratio[0]) * aspect_ratio[1]
+
+
+        # Ensure the box fits within the image boundaries
+        if start_x < current_x:  # Right direction
+            if start_x + width > image_dimensions[0]:
+                width = image_dimensions[0] - start_x
+                if aspect_ratio is not None:
+                    height = (width / aspect_ratio[0]) * aspect_ratio[1]
+        else:  # Left direction
+            if start_x - width < 0:
+                width = start_x
+                if aspect_ratio is not None:
+                    height = (width / aspect_ratio[0]) * aspect_ratio[1]
+
+        if start_y < current_y:  # Down direction
+            if start_y + height > image_dimensions[1]:
+                height = image_dimensions[1] - start_y
+                if aspect_ratio is not None:
+                    width = (height / aspect_ratio[1]) * aspect_ratio[0]
+        else:  # Up direction
+            if start_y - height < 0:
+                height = start_y
+                if aspect_ratio is not None:
+                    width = (height / aspect_ratio[1]) * aspect_ratio[0]
+
+        # Calculate the top-left and bottom-right coordinates
+        if current_x < start_x:
+            left_x: int = start_x - width
+            right_x: int = start_x
+        else:
+            left_x: int = start_x
+            right_x: int = start_x + width
+
+        if current_y < start_y:
+            top_y: int = start_y - height
+            bottom_y: int = start_y
+        else:
+            top_y: int = start_y
+            bottom_y: int = start_y + height
+        
+
         selection_box: Tuple[int,
                              int,
                              int,
-                             int] = (selection_top_left_x,
-                                     selection_top_left_y,
-                                     selection_bottom_right_x,
-                                     selection_bottom_right_y)
-
-        if aspect_ratio is not None:
-            aspect_ratio: float = float(
-                aspect_ratio[0]) / float(aspect_ratio[1])
-            try:
-                selection_box: Tuple[int, int, int, int] = Controller.get_selection_box_for_aspect_ratio(
-                    image_dimensions, selection_box, aspect_ratio, mouse_press_coord, mouse_move_coord)
-            except ZeroDivisionError:
-                pass
+                             int] = (left_x,
+                                     top_y,
+                                     right_x,
+                                     bottom_y)
 
         return selection_box
 
