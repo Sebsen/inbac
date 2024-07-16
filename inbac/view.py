@@ -219,8 +219,8 @@ class View():
         return self.image_canvas.create_rectangle(box, outline=outline_color)
     
     def create_overlay(
-            self, box: Tuple[int, int, int, int]) -> Any:
-        return self.image_canvas.create_rectangle(box, outline="", fill="black", stipple="gray25")
+            self, box: Tuple[int, int, int, int], outline="", fill="black", stipple="gray25") -> Any:
+        return self.image_canvas.create_rectangle(box, outline=outline, fill=fill, stipple=stipple)
 
     def change_canvas_object_coords(self, obj: Any, coords: Tuple[int, int]):
         self.image_canvas.coords(obj, coords)
