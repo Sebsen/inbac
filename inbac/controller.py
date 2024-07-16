@@ -124,6 +124,8 @@ class Controller():
     def start_selection(self, press_coord: Tuple[int, int]):
         self.model.press_coord = press_coord
         self.model.move_coord = press_coord
+        if self.is_outside_image_dimensions(press_coord):
+            return
         if self.model.enabled_selection_mode and self.model.selection_box is not None:
             selected_box: Tuple[int, int, int, int] = self.view.get_canvas_object_coords(
                 self.model.selection_box)
@@ -134,6 +136,8 @@ class Controller():
 
     def move_selection(self, move_coord: Tuple[int, int]):
         if self.model.enabled_selection_mode and not self.model.box_selected:
+            return
+        if self.is_outside_image_dimensions(move_coord):
             return
         prev_move_coord: Tuple[int, int] = self.model.move_coord
         self.model.move_coord = move_coord
@@ -167,6 +171,11 @@ class Controller():
                 self.update_overlays(new_x0, new_y0, new_x1, new_y1)
         else:
             self.update_selection_box()
+
+    def is_outside_image_dimensions(self, move_coord: Tuple[int, int]) -> bool:
+        image_dimensions: Tuple[int, int] = self.model.canvas_image_dimensions
+        image_box: Tuple[int, int, int, int] = (0, 0, image_dimensions[0], image_dimensions[1])
+        return not self.coordinates_in_selection_box(move_coord, image_box)
 
     def next_image(self):
         if self.model.current_file + 1 >= len(self.model.images):
@@ -279,7 +288,7 @@ class Controller():
 
     @staticmethod
     def coordinates_in_selection_box(
-            coordinates: Tuple[int, int], selection_box: Tuple[int, int]) -> bool:
+            coordinates: Tuple[int, int], selection_box: Tuple[int, int, int, int]) -> bool:
         return (coordinates[0] > selection_box[0] and coordinates[0] < selection_box[2]
                 and coordinates[1] > selection_box[1] and coordinates[1] < selection_box[3])
 
