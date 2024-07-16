@@ -58,7 +58,7 @@ class Controller():
         # By default start with selection box covering biggest part of image possible
         # Artificially created selection box must be slightly smaller than whole image (for to range check to work)!
         self.start_selection((0, 0))
-        self.move_selection((image_width, image_height))
+        self.program_move_selection((image_width, image_height))
         # Get current coordinates of the selection box
         left_x, top_y, right_x, bottom_y = self.view.get_canvas_object_coords(self.model.selection_box)
         self.update_overlays(left_x, top_y, right_x, bottom_y)
@@ -202,18 +202,40 @@ class Controller():
         self.model.move_coord = press_coord
         if self.is_outside_image_dimensions(press_coord):
             return
-        if self.model.enabled_selection_mode and self.model.selection_box is not None:
+        if self.model.enabled_selection_mode:
+            self.clear_selection_box()
+        elif self.model.selection_box is not None:
             selected_box: Tuple[int, int, int, int] = self.view.get_canvas_object_coords(
                 self.model.selection_box)
             self.model.box_selected = self.coordinates_in_selection_box(
                 self.model.press_coord, selected_box)
-        else:
-            self.clear_selection_box()
+            
+
+    def program_move_selection(self, move_coord: Tuple[int, int]):
+        """
+        Utility to programatically move/ create the selection box on the canvas. This is like the user would do -> by reusing all existing functions, with minimal
+        additional (technical) boilerplate code.
+        To be able to programatically move/ create the selection box, "enabled_selection_mode" must be artificially activated
+        """
+        previous_state = self.model.enabled_selection_mode
+        self.model.enabled_selection_mode = True
+        self.move_selection(move_coord)
+        self.model.enabled_selection_mode = previous_state
+
 
     def move_selection(self, move_coord: Tuple[int, int]):
-        if self.model.enabled_selection_mode and not self.model.box_selected:
+        """
+        Called whenever the selection box should be initially created on canvas or must be moved.
+        When canvas doesn't exist yet on screen will be created, otherwise moved.
+        """
+        if not self.model.enabled_selection_mode and not self.model.box_selected:
+            # We are not in "selection mode" (-> existing selection box shall be moved), but we don't have a box (it must exist though)
+            # => exit
+            # In "selection mode" it doesn't matter whether there is an existing selection box or not, it will be replaced anyway
             return
         if self.is_outside_image_dimensions(move_coord):
+            # In any case the desired coordinates (regardless if from user or program) must be within image range to perform useful actions. If not in image range:
+            # => exit
             return
         prev_move_coord: Tuple[int, int] = self.model.move_coord
         self.model.move_coord = move_coord
