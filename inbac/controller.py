@@ -318,10 +318,10 @@ class Controller():
 
     def update_overlays(self, left_x, top_y, right_x, bottom_y):
         image_dimensions = self.model.canvas_image_dimensions
-        self.view.change_canvas_overlay_coords(self.model.overlay_top, (0, 0, image_dimensions[0], top_y - 1))
-        self.view.change_canvas_overlay_coords(self.model.overlay_bottom, (0, bottom_y + 1, image_dimensions[0], image_dimensions[1]))
-        self.view.change_canvas_overlay_coords(self.model.overlay_left, (0, top_y - 1, left_x - 1, bottom_y + 1))
-        self.view.change_canvas_overlay_coords(self.model.overlay_right, (right_x + 1, top_y - 1, image_dimensions[0], bottom_y + 1))
+        self.view.change_canvas_overlay_coords(self.model.overlay_top, (0, 0, image_dimensions[0], top_y))
+        self.view.change_canvas_overlay_coords(self.model.overlay_bottom, (0, bottom_y, image_dimensions[0], image_dimensions[1]))
+        self.view.change_canvas_overlay_coords(self.model.overlay_left, (0, top_y, left_x, bottom_y))
+        self.view.change_canvas_overlay_coords(self.model.overlay_right, (right_x, top_y, image_dimensions[0], bottom_y))
 
     @staticmethod
     def calculate_canvas_image_dimensions(image_width: int,
