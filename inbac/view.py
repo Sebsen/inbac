@@ -38,6 +38,7 @@ class View():
         self.image_canvas.bind('<ButtonPress-1>', self.on_mouse_down)
         self.image_canvas.bind('<B1-Motion>', self.on_mouse_drag)
         self.image_canvas.bind('<ButtonRelease-1>', self.on_mouse_up)
+        self.image_canvas.bind("<MouseWheel>", self.on_mouse_wheel)
 
         self.master.bind('<KeyPress-Shift_L>', self.enable_selection_mode)
         self.master.bind('<KeyPress-Control_L>', self.enable_selection_mode)
@@ -251,6 +252,9 @@ class View():
 
     def on_mouse_up(self, event: Event):
         self.controller.stop_selection()
+
+    def on_mouse_wheel(self, event: Event):
+        self.controller.on_mouse_wheel_zoom(event.delta)
 
     def next_image(self, event: Event = None):
         self.controller.next_image()

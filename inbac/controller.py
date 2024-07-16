@@ -128,6 +128,54 @@ class Controller():
     def stop_selection(self):
         self.model.box_selected = False
 
+    def on_mouse_wheel_zoom(self, delta: int):
+        if not self.model.selection_box:
+            return
+
+        # Get current coordinates of the selection box
+        left_x, top_y, right_x, bottom_y = self.view.get_canvas_object_coords(self.model.selection_box)
+
+        # Calculate the current width and height of selection box
+        width: int = right_x - left_x
+        height: int = bottom_y - top_y
+
+        # Calculate the change in size
+        delta: int = 10 if delta > 0 else -10
+
+        aspect_ratio: Tuple[int, int] = self.model.args.aspect_ratio
+
+        # Update width and height based on the aspect ratio
+        if aspect_ratio is not None:
+            new_width = width + delta
+            new_height = (new_width / aspect_ratio[0]) * aspect_ratio[1]
+        else:
+            new_width = width + delta
+            new_height = height + delta
+
+        # Image width
+        image_width: int = self.model.canvas_image_dimensions[0]
+        image_height: int = self.model.canvas_image_dimensions[1]
+
+        # Ensure the new size fits within the image boundaries
+        if left_x + new_width > image_width:
+            new_width = image_width - left_x
+            if aspect_ratio is not None:
+                new_height = (new_width / aspect_ratio[0]) * aspect_ratio[1]
+        if top_y + new_height > image_height:
+            new_height = image_height - top_y
+            if aspect_ratio is not None:
+                new_width = (new_height / aspect_ratio[1]) * aspect_ratio[0]
+
+        # Restrict resizing only when going too small
+        if delta < 0 and (new_width < 10 or new_height < 10):
+            return
+
+        # Update the selection box coordinates
+        self.view.change_canvas_overlay_coords(self.model.selection_box, (left_x, top_y, left_x + new_width, top_y + new_height))
+
+        # Update the overlay rectangles
+        self.update_overlays(left_x, top_y, left_x + new_width, top_y + new_height)
+
     def start_selection(self, press_coord: Tuple[int, int]):
         self.model.press_coord = press_coord
         self.model.move_coord = press_coord
