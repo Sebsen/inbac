@@ -40,6 +40,9 @@ class View():
         self.image_canvas.bind('<ButtonRelease-1>', self.on_mouse_up)
         self.image_canvas.bind("<MouseWheel>", self.on_mouse_wheel)
 
+        # Get the selection box cleared from canvas when pressing escape
+        self.master.bind('<Escape>', self.on_escape)
+
         self.master.bind('<KeyPress-Shift_L>', self.enable_selection_mode)
         self.master.bind('<KeyPress-Control_L>', self.enable_selection_mode)
         self.master.bind('<KeyRelease-Shift_L>', self.disable_selection_mode)
@@ -261,6 +264,9 @@ class View():
 
     def on_mouse_wheel(self, event: Event):
         self.controller.on_mouse_wheel_zoom(event.delta)
+
+    def on_escape(self, event: Event):
+        self.controller.clear_selection_box()
 
     def next_image(self, event: Event = None):
         self.controller.next_image()
