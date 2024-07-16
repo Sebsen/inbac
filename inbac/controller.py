@@ -1,3 +1,4 @@
+from fractions import Fraction
 import itertools
 import mimetypes
 import os
@@ -39,9 +40,15 @@ class Controller():
             self.model.current_image = None
         image = Image.open(os.path.join(self.model.args.input_dir, image_name))
         self.display_image_on_canvas(image)
-        image_name_with_counter = "({0}/{1}): {2}".format(
-            self.model.current_file + 1, len(self.model.images), image_name)
-        self.view.set_title(image_name_with_counter)
+        image_dimensions = self.model.canvas_image_dimensions
+        image_width: int = image_dimensions[0]
+        image_height: int = image_dimensions[1]
+        # TODO: Add mapping from float to aspect ratio with tolerances -> introduce tolerant function for proper mapping!
+        aspect_ratio: Fraction = Fraction(round(image_width / image_height, 3)).limit_denominator()
+        aspect_ratio_string: str = str(aspect_ratio).replace('/', ':')
+        image_name_with_counter = f'({self.model.current_file + 1}/{len(self.model.images)}): {image_name}'
+        full_image_title = f'{image_name_with_counter} - Dimensions: {image_width}x{image_height} - Aspect Ratio: {aspect_ratio_string}'
+        self.view.set_title(full_image_title)
 
     def load_images(self):
         if self.model.args.input_dir:
