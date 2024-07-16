@@ -62,6 +62,7 @@ class Controller():
         # Get current coordinates of the selection box
         left_x, top_y, right_x, bottom_y = self.view.get_canvas_object_coords(self.model.selection_box)
         self.update_overlays(left_x, top_y, right_x, bottom_y)
+        self.update_golden_ratio_lines(left_x, top_y, right_x, bottom_y)
 
     def load_images(self):
         if self.model.args.input_dir:
@@ -104,6 +105,11 @@ class Controller():
         if self.model.selection_box is not None:
             self.view.remove_from_canvas(self.model.selection_box)
             self.model.selection_box = None
+        
+        # Also clear golden ratio lines, which can be considered being part of the selection box itself (-> created and deleted together)
+        for line in self.model.golden_ratio_lines:
+            self.view.remove_from_canvas(line)
+        self.model.golden_ratio_lines.clear()
 
         # Also clear overlays, which can be considered being part of the selection box itself (-> created and deleted together)
         if self.model.overlay_top is not None:
@@ -137,6 +143,8 @@ class Controller():
                      self.model.selection_box, selected_box)
             # Update the overlay rectangles
             self.update_overlays(selected_box[0], selected_box[1], selected_box[2], selected_box[3])
+            # Draw the golden ratio lines
+            self.update_golden_ratio_lines(selected_box[0], selected_box[1], selected_box[2], selected_box[3])
 
     def stop_selection(self):
         self.model.box_selected = False
@@ -183,6 +191,8 @@ class Controller():
 
         # Update the overlay rectangles
         self.update_overlays(left_x, top_y, left_x + new_width, top_y + new_height)
+        # Draw the golden ratio lines
+        self.update_golden_ratio_lines(left_x, top_y, left_x + new_width, top_y + new_height)
 
     def start_selection(self, press_coord: Tuple[int, int]):
         self.model.press_coord = press_coord
@@ -232,6 +242,8 @@ class Controller():
             
                 # Update the overlay rectangles
                 self.update_overlays(new_x0, new_y0, new_x1, new_y1)
+                # Draw the golden ratio lines
+                self.update_golden_ratio_lines(new_x0, new_y0, new_x1, new_y1)
         else:
             self.update_selection_box()
 
@@ -322,6 +334,34 @@ class Controller():
         self.view.change_canvas_overlay_coords(self.model.overlay_bottom, (0, bottom_y, image_dimensions[0], image_dimensions[1]))
         self.view.change_canvas_overlay_coords(self.model.overlay_left, (0, top_y, left_x, bottom_y))
         self.view.change_canvas_overlay_coords(self.model.overlay_right, (right_x, top_y, image_dimensions[0], bottom_y))
+    
+    # TODO: Add option to control display of golden ratio lines via args from CLI + checkbox on UI
+    def update_golden_ratio_lines(self, left_x, top_y, right_x, bottom_y):
+        for line in self.model.golden_ratio_lines:
+            self.view.remove_from_canvas(line)
+        self.model.golden_ratio_lines.clear()
+
+        width = right_x - left_x
+        height = bottom_y - top_y
+
+        phi = (1 + 5 ** 0.5) / 2  # Golden ratio
+
+        # Vertical lines
+        vertical_line_1_x = left_x + width / phi
+        vertical_line_2_x = right_x - width / phi
+        self.model.golden_ratio_lines.append(
+            self.view.create_line((vertical_line_1_x, top_y, vertical_line_1_x, bottom_y)))
+        self.model.golden_ratio_lines.append(
+            self.view.create_line((vertical_line_2_x, top_y, vertical_line_2_x, bottom_y)))
+
+        # Horizontal lines
+        horizontal_line_1_y = top_y + height / phi
+        horizontal_line_2_y = bottom_y - height / phi
+        self.model.golden_ratio_lines.append(
+            self.view.create_line((left_x, horizontal_line_1_y, right_x, horizontal_line_1_y)))
+        self.model.golden_ratio_lines.append(
+            self.view.create_line((left_x, horizontal_line_2_y, right_x, horizontal_line_2_y)))
+
 
     @staticmethod
     def calculate_canvas_image_dimensions(image_width: int,

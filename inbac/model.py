@@ -9,6 +9,7 @@ class Model():
         self.args: Namespace = args
         self.images: List[str] = []
         self.selection_box: Optional[Any] = None
+        self.golden_ratio_lines = []
         self.press_coord: Tuple[int, int] = (0, 0)
         self.move_coord: Tuple[int, int] = (0, 0)
         self.displayed_image: Optional[PhotoImage] = None

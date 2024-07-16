@@ -214,6 +214,9 @@ class View():
     def remove_from_canvas(self, obj: Any):
         self.image_canvas.delete(obj)
 
+    def create_line(self, coords: Tuple[int, int, int, int], fill="gold", dash=(4, 2)):
+        return self.image_canvas.create_line(coords[0], coords[1], coords[2], coords[3], fill=fill, dash=dash)
+
     def create_rectangle(
             self, box: Tuple[int, int, int, int], outline_color: str) -> Any:
         return self.image_canvas.create_rectangle(box, outline=outline_color)
@@ -237,7 +240,7 @@ class View():
             offset_x: int,
             offset_y: int):
             self.image_canvas.move(obj, offset_x, offset_y)
-
+    
     def enable_selection_mode(self, event: Event = None):
         self.controller.model.enabled_selection_mode = True
 
