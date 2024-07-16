@@ -50,6 +50,10 @@ class Controller():
         full_image_title = f'{image_name_with_counter} - Dimensions: {image_width}x{image_height} - Aspect Ratio: {aspect_ratio_string}'
         self.view.set_title(full_image_title)
 
+        # If we don't have custom, user-specified aspect ratio don't draw initial box
+        if self.model.args.aspect_ratio is None:
+            return
+
         # TODO: Add option to control it via args from CLI + checkbox on UI
         # By default start with selection box covering biggest part of image possible
         # Artificially created selection box must be slightly smaller than whole image (for to range check to work)!
