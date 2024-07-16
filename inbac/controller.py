@@ -142,15 +142,12 @@ class Controller():
         # Calculate the change in size
         delta: int = 10 if delta > 0 else -10
 
-        aspect_ratio: Tuple[int, int] = self.model.args.aspect_ratio
+        # Maintain user defined aspect ratio and if not present the current selection box'
+        aspect_ratio: Tuple[int, int] = self.model.args.aspect_ratio if self.model.args.aspect_ratio is not None else (width, height)
 
         # Update width and height based on the aspect ratio
-        if aspect_ratio is not None:
-            new_width = width + delta
-            new_height = (new_width / aspect_ratio[0]) * aspect_ratio[1]
-        else:
-            new_width = width + delta
-            new_height = height + delta
+        new_width = width + delta
+        new_height = (new_width / aspect_ratio[0]) * aspect_ratio[1]
 
         # Image width
         image_width: int = self.model.canvas_image_dimensions[0]
@@ -159,12 +156,10 @@ class Controller():
         # Ensure the new size fits within the image boundaries
         if left_x + new_width > image_width:
             new_width = image_width - left_x
-            if aspect_ratio is not None:
-                new_height = (new_width / aspect_ratio[0]) * aspect_ratio[1]
+            new_height = (new_width / aspect_ratio[0]) * aspect_ratio[1]
         if top_y + new_height > image_height:
             new_height = image_height - top_y
-            if aspect_ratio is not None:
-                new_width = (new_height / aspect_ratio[1]) * aspect_ratio[0]
+            new_width = (new_height / aspect_ratio[1]) * aspect_ratio[0]
 
         # Restrict resizing only when going too small
         if delta < 0 and (new_width < 10 or new_height < 10):
