@@ -233,6 +233,9 @@ class View():
 
     def get_canvas_object_coords(self, obj: Any) -> Any:
         return self.image_canvas.coords(obj)
+    
+    def tag_raise(self, obj: Any):
+        self.image_canvas.tag_raise(obj)
 
     def move_canvas_object_by_offset(
             self,

@@ -63,6 +63,7 @@ class Controller():
         left_x, top_y, right_x, bottom_y = self.view.get_canvas_object_coords(self.model.selection_box)
         self.update_overlays(left_x, top_y, right_x, bottom_y)
         self.update_golden_ratio_lines(left_x, top_y, right_x, bottom_y)
+        self.view.tag_raise(self.model.selection_box)
 
     def load_images(self):
         if self.model.args.input_dir:
@@ -145,6 +146,7 @@ class Controller():
             self.update_overlays(selected_box[0], selected_box[1], selected_box[2], selected_box[3])
             # Draw the golden ratio lines
             self.update_golden_ratio_lines(selected_box[0], selected_box[1], selected_box[2], selected_box[3])
+            self.view.tag_raise(self.model.selection_box)
 
     def stop_selection(self):
         self.model.box_selected = False
@@ -193,6 +195,7 @@ class Controller():
         self.update_overlays(left_x, top_y, left_x + new_width, top_y + new_height)
         # Draw the golden ratio lines
         self.update_golden_ratio_lines(left_x, top_y, left_x + new_width, top_y + new_height)
+        self.view.tag_raise(self.model.selection_box)
 
     def start_selection(self, press_coord: Tuple[int, int]):
         self.model.press_coord = press_coord
@@ -244,6 +247,7 @@ class Controller():
                 self.update_overlays(new_x0, new_y0, new_x1, new_y1)
                 # Draw the golden ratio lines
                 self.update_golden_ratio_lines(new_x0, new_y0, new_x1, new_y1)
+                self.view.tag_raise(self.model.selection_box)
         else:
             self.update_selection_box()
 
