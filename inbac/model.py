@@ -21,5 +21,8 @@ class Model():
         self.overlay_left: Optional[Any] = None
         self.overlay_right: Optional[Any] = None
         self.enabled_selection_mode: bool = False
+        self.default_scrolling_speed_in_px: int = 8
+        self.smooth_scrolling_speed_in_px: int = 1
+        self.effective_scrolling_speed_in_px: int = self.default_scrolling_speed_in_px
         self.box_selected: bool = False
         self.current_file: int = 0

@@ -180,7 +180,8 @@ class Controller():
         height: int = bottom_y - top_y
 
         # Calculate the change in size
-        delta: int = 8 if delta > 0 else -8
+        direction: int = 1 if delta > 0 else -1
+        delta: int = self.model.effective_scrolling_speed_in_px * direction
 
         # Maintain user defined aspect ratio and if not present the current selection box'
         aspect_ratio: Tuple[int, int] = self.model.args.aspect_ratio if self.model.args.aspect_ratio is not None else (width, height)

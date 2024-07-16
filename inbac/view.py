@@ -248,10 +248,20 @@ class View():
             self.image_canvas.move(obj, offset_x, offset_y)
     
     def enable_selection_mode(self, event: Event = None):
+        """
+        Enables the selection mode in case a selection is performed for the image on the image canvas (-> dragging with left mouse).
+        In case of zooming/ scrolling (-> with mouse wheel) enables smooth scrolling
+        """
         self.controller.model.enabled_selection_mode = True
+        self.controller.model.effective_scrolling_speed_in_px = self.controller.model.smooth_scrolling_speed_in_px
 
     def disable_selection_mode(self, event: Event = None):
+        """
+        Disables the selection mode in case a selection is performed for the image on the image canvas (-> dragging with left mouse).
+        In case of zooming/ scrolling (-> with mouse wheel) disables smooth scrolling and returns to normal scrolling
+        """
         self.controller.model.enabled_selection_mode = False
+        self.controller.model.effective_scrolling_speed_in_px = self.controller.model.default_scrolling_speed_in_px
 
     def on_mouse_down(self, event: Event):
         self.controller.start_selection((event.x, event.y))
