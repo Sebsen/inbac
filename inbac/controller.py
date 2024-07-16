@@ -39,10 +39,10 @@ class Controller():
             self.model.current_image.close()
             self.model.current_image = None
         image = Image.open(os.path.join(self.model.args.input_dir, image_name))
-        self.display_image_on_canvas(image)
-        image_dimensions = self.model.canvas_image_dimensions
+        image_dimensions: Tuple[int, int] = self.display_image_on_canvas(image)
         image_width: int = image_dimensions[0]
         image_height: int = image_dimensions[1]
+
         # TODO: Add mapping from float to aspect ratio with tolerances -> introduce tolerant function for proper mapping!
         aspect_ratio: Fraction = Fraction(round(image_width / image_height, 3)).limit_denominator()
         aspect_ratio_string: str = str(aspect_ratio).replace('/', ':')
@@ -50,15 +50,24 @@ class Controller():
         full_image_title = f'{image_name_with_counter} - Dimensions: {image_width}x{image_height} - Aspect Ratio: {aspect_ratio_string}'
         self.view.set_title(full_image_title)
 
+    # TODO: Add option to control it via args from CLI + checkbox on UI
+    def draw_initial_selection_box(self):
+        image_dimensions: Tuple[int, int] = self.model.canvas_image_dimensions
+        # We don't have image dimensions, but they're required
+        if image_dimensions is None:
+            return
+
         # If we don't have custom, user-specified aspect ratio don't draw initial box
         if self.model.args.aspect_ratio is None:
             return
 
-        # TODO: Add option to control it via args from CLI + checkbox on UI
+        image_width: int = image_dimensions[0]
+        image_height: int = image_dimensions[1]
+
         # By default start with selection box covering biggest part of image possible
-        # Artificially created selection box must be slightly smaller than whole image (for to range check to work)!
         self.start_selection((0, 0))
         self.program_move_selection((image_width, image_height))
+
         # Get current coordinates of the selection box
         left_x, top_y, right_x, bottom_y = self.view.get_canvas_object_coords(self.model.selection_box)
         self.update_overlays(left_x, top_y, right_x, bottom_y)
@@ -81,7 +90,11 @@ class Controller():
             except IOError:
                 self.next_image()
 
-    def display_image_on_canvas(self, image: Image):
+    def display_image_on_canvas(self, image: Image) -> Tuple[int, int]:
+        """
+        Called when the main window is resized, a new image is being loaded or the image is rotated.
+        Displays the requested image on the canvas
+        """
         self.clear_canvas()
         self.model.current_image = image
         self.model.canvas_image_dimensions = self.calculate_canvas_image_dimensions(
@@ -95,6 +108,10 @@ class Controller():
         self.model.displayed_image = ImageTk.PhotoImage(displayed_image)
         self.model.canvas_image = self.view.display_image(
             self.model.displayed_image)
+
+        self.draw_initial_selection_box()
+
+        return self.model.canvas_image_dimensions
 
     def clear_canvas(self):
         self.clear_selection_box()
