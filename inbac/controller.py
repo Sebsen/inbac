@@ -57,8 +57,8 @@ class Controller():
         # TODO: Add option to control it via args from CLI + checkbox on UI
         # By default start with selection box covering biggest part of image possible
         # Artificially created selection box must be slightly smaller than whole image (for to range check to work)!
-        self.start_selection((1, 1))
-        self.move_selection((image_width - 1, image_height - 1))
+        self.start_selection((0, 0))
+        self.move_selection((image_width, image_height))
         # Get current coordinates of the selection box
         left_x, top_y, right_x, bottom_y = self.view.get_canvas_object_coords(self.model.selection_box)
         self.update_overlays(left_x, top_y, right_x, bottom_y)
@@ -161,7 +161,7 @@ class Controller():
         height: int = bottom_y - top_y
 
         # Calculate the change in size
-        delta: int = 10 if delta > 0 else -10
+        delta: int = 8 if delta > 0 else -8
 
         # Maintain user defined aspect ratio and if not present the current selection box'
         aspect_ratio: Tuple[int, int] = self.model.args.aspect_ratio if self.model.args.aspect_ratio is not None else (width, height)
@@ -392,8 +392,8 @@ class Controller():
     @staticmethod
     def coordinates_in_selection_box(
             coordinates: Tuple[int, int], selection_box: Tuple[int, int, int, int]) -> bool:
-        return (coordinates[0] > selection_box[0] and coordinates[0] < selection_box[2]
-                and coordinates[1] > selection_box[1] and coordinates[1] < selection_box[3])
+        return (coordinates[0] >= selection_box[0] and coordinates[0] <= selection_box[2]
+                and coordinates[1] >= selection_box[1] and coordinates[1] <= selection_box[3])
 
     @staticmethod
     def find_available_name(directory: str, filename: str) -> str:
