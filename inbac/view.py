@@ -7,7 +7,8 @@ import inbac
 
 
 class View():
-    def __init__(self, master: Tk, initial_window_size: Tuple[int, int], no_fullscreen: bool):
+    def __init__(self, master: Tk, controller, initial_window_size: Tuple[int, int], no_fullscreen: bool):
+        self.controller = controller
         self.master: Tk = master
         self.frame: Frame = tk.Frame(self.master, relief=tk.FLAT)
         self.frame.pack(fill=tk.BOTH, expand=tk.YES)
@@ -19,7 +20,6 @@ class View():
         if not no_fullscreen:
             self.master.state('zoomed') 
         self.master.update()
-        self.controller = None
 
         self.bind_events()
         self.create_menu()
@@ -285,8 +285,9 @@ class View():
         self.controller.previous_image()
 
     def on_resize(self, event: Event = None):
-        self.controller.display_image_on_canvas(
-            self.controller.model.current_image)
+        if self.controller.model.current_image is not None:
+            self.controller.display_image_on_canvas(
+                self.controller.model.current_image)
 
     def save_next(self, event: Event = None):
         self.controller.save_next()

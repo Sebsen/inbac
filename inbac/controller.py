@@ -12,10 +12,12 @@ from inbac.view import View
 
 
 class Controller():
-    def __init__(self, model: Model, view: View):
+    def __init__(self, model: Model):
         self.model: Model = model
-        self.view: View = view
+        self.view = None
 
+    def run(self):
+        self.select_images_folder()
         self.load_images()
 
     def select_images_folder(self):

@@ -13,16 +13,14 @@ from inbac.controller import Controller
 class Application():
     def __init__(self, args: Namespace, master: Tk):
         self.model: Model = Model(args)
-        self.view: View = View(master, args.window_size, args.no_fullscreen)
 
-        if args.input_dir is None:
-            args.input_dir = filedialog.askdirectory(parent=master)
-        args.output_dir = getattr(
-            args, "output_dir", os.path.join(args.input_dir, "crops"))
+        self.controller: Controller = Controller(self.model)
+        self.view: View = View(master, self.controller, args.window_size, args.no_fullscreen)
 
-        self.controller: Controller = Controller(self.model, self.view)
+        self.controller.view = self.view
 
-        self.view.controller = self.controller
+        self.controller.run()
+
 
     def run(self):
         self.view.master.mainloop()
