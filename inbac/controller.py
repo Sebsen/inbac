@@ -397,17 +397,17 @@ class Controller():
         vertical_line_1_x = left_x + width / phi
         vertical_line_2_x = right_x - width / phi
         self.model.golden_ratio_lines.append(
-            self.view.create_line((vertical_line_1_x, top_y, vertical_line_1_x, bottom_y)))
+            self.view.create_line((vertical_line_1_x, top_y, vertical_line_1_x, bottom_y), fill=self.model.args.selection_box_color))
         self.model.golden_ratio_lines.append(
-            self.view.create_line((vertical_line_2_x, top_y, vertical_line_2_x, bottom_y)))
+            self.view.create_line((vertical_line_2_x, top_y, vertical_line_2_x, bottom_y), fill=self.model.args.selection_box_color))
 
         # Horizontal lines
         horizontal_line_1_y = top_y + height / phi
         horizontal_line_2_y = bottom_y - height / phi
         self.model.golden_ratio_lines.append(
-            self.view.create_line((left_x, horizontal_line_1_y, right_x, horizontal_line_1_y)))
+            self.view.create_line((left_x, horizontal_line_1_y, right_x, horizontal_line_1_y), fill=self.model.args.selection_box_color))
         self.model.golden_ratio_lines.append(
-            self.view.create_line((left_x, horizontal_line_2_y, right_x, horizontal_line_2_y)))
+            self.view.create_line((left_x, horizontal_line_2_y, right_x, horizontal_line_2_y), fill=self.model.args.selection_box_color))
 
 
     @staticmethod
