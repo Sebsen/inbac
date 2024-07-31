@@ -620,11 +620,15 @@ class Controller():
             # Sort files by crop number and suffix using the custom sort key
             files.sort(key=natural_sort_key)
 
-            # FIXME: Files should be processed from back, since new filename could already exist -> blocking!
-            # Rename files to close the gaps or introduce the new gaps
-            for new_index, (_, suffix, extension, old_filename) in enumerate(files, start=1):
-                if gap_after is not None and new_index > gap_after:
-                    new_index += gap_size
+            # FIXME: If gap is in middle and e.g. pos=6 and there's existing crop8 and crop9 still issue is occurring
+            #        => Insert gaps backwards and remove gaps forward direction?!
+            # Rename files to close the gaps or introduce the new gaps (backward to avoid conflicts)
+            for i in range(len(files)-1, -1, -1):
+                crop_number, suffix, extension, old_filename = files[i]
+                if gap_after is not None and crop_number > gap_after:
+                    new_index = i + 1 + gap_size
+                else:
+                    new_index = i + 1
                 new_filename = f"{base_name}{new_index}{suffix}{extension}" # TODO: Remove suffix from new name?
                 old_filepath = os.path.join(directory, old_filename)
                 new_filepath = os.path.join(directory, new_filename)
