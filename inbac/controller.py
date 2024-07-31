@@ -3,6 +3,7 @@ import itertools
 import mimetypes
 import os
 
+import re
 from typing import Optional, List, Tuple
 
 from PIL import Image, ImageTk
@@ -552,3 +553,76 @@ class Controller():
                                                                                 displayed_image_size[0]), int(selected_box[3] *
                                                                                                               original_image_size[1] /
                                                                                                               displayed_image_size[1]))
+    @staticmethod
+    def fill_filename_gaps(directory, process_all=True, gap_after=None, gap_size=20):
+        """
+        Has two purposes:
+            1. Removes the sequence number gaps in filenames of image files containing the "_crop" identifier. Can be performed for all files
+                of the current directory or only the newest one
+            2. Introduces gaps of the specified gap_size (default=6) to the filenames after the specified index. Can only be performed for latest
+                file
+        """
+
+        # Regular expression to match the filename structure
+        pattern = re.compile(r"(.*_crop)(\d+)(.*\.)(jpg|jpeg|png)", re.IGNORECASE) # TODO: Add capture group 4?!
+        valid_extensions = ('.jpg', '.jpeg', '.png')
+        
+        # Dictionary to hold filenames by their base name
+        files_dict = {}
+        
+        # List all image files in the directory with their modification times
+        files_with_times = [
+            (filename, os.path.getmtime(os.path.join(directory, filename)))
+            for filename in os.listdir(directory)
+            if filename.lower().endswith(valid_extensions)
+        ]
+        
+        # Sort files by modification time to find the newest file
+        files_with_times.sort(key=lambda x: x[1])
+        
+        # If not processing all, select only the last file based on modification time
+        latest_file_base_name=None
+        if not process_all and files_with_times:
+            newest_file_tuple = files_with_times[-1]
+            match = pattern.match(newest_file_tuple[0])
+            if match:
+                latest_file_base_name = match.group(1)
+        
+        # Extract and categorize files based on the regular expression (-> create files_dict)
+        for filename, _ in files_with_times:
+            match = pattern.match(filename)
+            if match:
+                base_name = match.group(1)
+                crop_number = int(match.group(2))
+                suffix = match.group(3)
+                extension = match.group(4)
+                # Only continue processing/ collecting files, when they match the latest file's base name (in case process_all=False provided)
+                if latest_file_base_name is None or base_name == latest_file_base_name:
+                    if base_name not in files_dict:
+                        # Only add key once to dict
+                        files_dict[base_name] = []
+                    files_dict[base_name].append((crop_number, suffix, extension, filename))
+        
+        # Custom comparison function to sort suffixes naturally
+        def natural_sort_key(item):
+            crop_number, suffix, extension, filename = item
+            return (crop_number, suffix or '')
+        
+        if gap_after is not None and len(files_dict) > 1:
+            raise Exception("Invalid amount of files -> invalid arguments to function! Only in latest file gaps can be introduced!")
+
+        # Process each group of files
+        for base_name, files in files_dict.items():
+            # Sort files by crop number and suffix using the custom sort key
+            files.sort(key=natural_sort_key)
+
+            # FIXME: Files should be processed from back, since new filename could already exist -> blocking!
+            # Rename files to close the gaps or introduce the new gaps
+            for new_index, (_, suffix, extension, old_filename) in enumerate(files, start=1):
+                if gap_after is not None and new_index > gap_after:
+                    new_index += gap_size
+                new_filename = f"{base_name}{new_index}{suffix}{extension}" # TODO: Remove suffix from new name?
+                old_filepath = os.path.join(directory, old_filename)
+                new_filepath = os.path.join(directory, new_filename)
+                if old_filename != new_filename:
+                    os.rename(old_filepath, new_filepath)
