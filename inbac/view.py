@@ -52,7 +52,6 @@ class View():
 
     def create_menu(self):
         self.menu: Menu = Menu(self.master, relief=tk.FLAT)
-        filename_gaps_menu = Menu(self.master, relief=tk.FLAT)
 
         self.menu.add_command(label="Open", command=self.open_dialog)
         self.menu.add_command(
@@ -62,11 +61,8 @@ class View():
         self.menu.add_command(label="Exit", command=self.master.quit)
         self.menu.add_command(label="\u22EE", activebackground=self.menu.cget("background"))
         self.menu.add_separator()
-        self.menu.add_cascade(label="Filename Gaps", menu=filename_gaps_menu)
+        self.menu.add_command(label="Filename Gaps", command=self.show_filename_gaps_window)
 
-        filename_gaps_menu.add_command(label="Remove Gaps (latest file)", command=self.remove_gaps_latest)
-        filename_gaps_menu.add_command(label="Remove Gaps (all files)", command=self.remove_gaps_all)
-        filename_gaps_menu.add_command(label="Insert Gaps", command=self.show_insert_gaps)
         self.master.config(menu=self.menu)
 
     def ask_directory(self) -> str:
@@ -214,8 +210,7 @@ class View():
         settings_window.destroy()
 
     def show_about_dialog(self):
-        messagebox.showinfo("About", "inbac " +
-                            inbac.__version__, parent=self.master)
+        messagebox.showinfo("About", "inbac " + inbac.__version__, parent=self.master)
     
     def remove_gaps_latest(self):
         self.controller.fill_filename_gaps(self.controller.model.args.output_dir, process_all=False)
@@ -223,34 +218,49 @@ class View():
     def remove_gaps_all(self):
         self.controller.fill_filename_gaps(self.controller.model.args.output_dir)
     
-    def show_insert_gaps(self):
+    def show_filename_gaps_window(self):
         insert_gaps_window = tk.Toplevel(self.master)
-        insert_gaps_window.title("Insert Filename Gaps")
-        insert_gaps_window.geometry("{}x{}".format(300, 175))
+        insert_gaps_window.title("Filename Gaps")
+        insert_gaps_window.geometry("{}x{}".format(450, 300))
 
         insert_gaps_window.bind("<Escape>", lambda x: self.cancel_settings(insert_gaps_window))
 
         settings = types.SimpleNamespace()
 
+        # Remove gaps
+        remove_gaps_label = tk.Label(insert_gaps_window, text='Remove Gaps:')
+        remove_gaps_label.grid(row=1, column=0, padx=5, pady=5)
+        
+        remove_gaps_latest = tk.Button(
+            insert_gaps_window,
+            text="Latest file only",
+            command=lambda: self.remove_gaps_latest()
+            )
+        remove_gaps_latest.grid(row=2, column=0, padx=5, pady=5)
+
+        remove_gaps_all = tk.Button(
+            insert_gaps_window,
+            text="Remove all",
+            command=lambda: self.remove_gaps_all()
+            )
+        remove_gaps_all.grid(row=2, column=1, padx=5, pady=5)
+
         # Gap index
-        gap_index_label = tk.Label(
-            insert_gaps_window, text='Crop number to insert the gap after:')
-        gap_index_label.grid(
-            row=1, column=0, columnspan=6, padx=5, pady=5)
+        gap_index_label = tk.Label(insert_gaps_window, text='Crop number to insert the gap after:')
+        gap_index_label.grid(row=3, column=0, columnspan=6, padx=5, pady=(20,5))
 
         settings.gap_index = tk.IntVar()
+        settings.gap_index.set(1)
         gap_index_entry = tk.Entry(
             insert_gaps_window,
             width=5,
             textvariable=settings.gap_index,
             bg="white")
-        gap_index_entry.grid(row=3, column=0, padx=5, pady=5)
+        gap_index_entry.grid(row=4, column=0, padx=5, pady=5)
 
         # Gap size
-        gap_size_label = tk.Label(
-            insert_gaps_window, text='Gap size (optional):')
-        gap_size_label.grid(
-            row=5, column=0, padx=5, pady=5)
+        gap_size_label = tk.Label(insert_gaps_window, text='Gap size (optional):')
+        gap_size_label.grid(row=5, column=0, padx=5, pady=5)
 
         settings.gap_size = tk.IntVar()
         gap_size_entry = tk.Entry(
