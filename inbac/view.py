@@ -226,13 +226,17 @@ class View():
     def show_insert_gaps(self):
         insert_gaps_window = tk.Toplevel(self.master)
         insert_gaps_window.title("Insert Filename Gaps")
-        insert_gaps_window.geometry("{}x{}".format(400, 400))
+        insert_gaps_window.geometry("{}x{}".format(300, 175))
+
+        insert_gaps_window.bind("<Escape>", lambda x: self.cancel_settings(insert_gaps_window))
+
         settings = types.SimpleNamespace()
 
-        selection_box_color_label = tk.Label(
+        # Gap index
+        gap_index_label = tk.Label(
             insert_gaps_window, text='Crop number to insert the gap after:')
-        selection_box_color_label.grid(
-            row=4, column=0, columnspan=2, padx=5, pady=5)
+        gap_index_label.grid(
+            row=1, column=0, columnspan=6, padx=5, pady=5)
 
         settings.gap_index = tk.IntVar()
         gap_index_entry = tk.Entry(
@@ -240,7 +244,21 @@ class View():
             width=5,
             textvariable=settings.gap_index,
             bg="white")
-        gap_index_entry.grid(row=1, column=0, padx=5, pady=5)
+        gap_index_entry.grid(row=3, column=0, padx=5, pady=5)
+
+        # Gap size
+        gap_size_label = tk.Label(
+            insert_gaps_window, text='Gap size (optional):')
+        gap_size_label.grid(
+            row=5, column=0, padx=5, pady=5)
+
+        settings.gap_size = tk.IntVar()
+        gap_size_entry = tk.Entry(
+            insert_gaps_window,
+            width=5,
+            textvariable=settings.gap_size,
+            bg="white")
+        gap_size_entry.grid(row=7, column=0, padx=5, pady=5)
 
 
         apply_button = tk.Button(
@@ -248,13 +266,15 @@ class View():
             text="Insert Gaps",
             command=lambda: self.insert_gaps(settings)
             )
-        apply_button.grid(row=6, column=0, padx=5, pady=5)
+        apply_button.grid(row=10, column=0, padx=5, pady=15)
 
         close_button = tk.Button(
             insert_gaps_window,
             text="Close",
             command=lambda: self.cancel_settings(insert_gaps_window))
-        close_button.grid(row=6, column=1, padx=5, pady=5)
+        close_button.grid(row=10, column=1, padx=5, pady=15)
+
+        insert_gaps_window.focus()
 
 
     def insert_gaps(self, settings: types.SimpleNamespace):
@@ -263,11 +283,14 @@ class View():
             # No valid index - return
             return
         
+        gap_size = settings.gap_size.get()
+        
         # Actually insert the gaps
         self.controller.fill_filename_gaps(
             self.controller.model.args.output_dir,
-            process_all=False,
-            gap_after=gap_index
+            process_all = False,
+            gap_after = gap_index,
+            gap_size = gap_size
         )
 
     def show_error(self, title: str, message: str):

@@ -11,6 +11,7 @@ from PIL import Image, ImageTk
 from inbac.model import Model
 from inbac.view import View
 
+DEFAULT_GAP_SIZE: int = 100
 
 class Controller():
     def __init__(self, model: Model):
@@ -554,7 +555,7 @@ class Controller():
                                                                                                               original_image_size[1] /
                                                                                                               displayed_image_size[1]))
     @staticmethod
-    def fill_filename_gaps(directory, process_all=True, gap_after=None, gap_size=20):
+    def fill_filename_gaps(directory, process_all=True, gap_after=None, gap_size=DEFAULT_GAP_SIZE):
         """
         Has two purposes:
             1. Removes the sequence number gaps in filenames of image files containing the "_crop" identifier. Can be performed for all files
@@ -562,6 +563,9 @@ class Controller():
             2. Introduces gaps of the specified gap_size (default=6) to the filenames after the specified index. Can only be performed for latest
                 file
         """
+
+        if gap_size is None or gap_size < 1:
+            gap_size = DEFAULT_GAP_SIZE
 
         # Regular expression to match the filename structure
         pattern = re.compile(r"(.*_crop)(\d+)(.*\.)(jpg|jpeg|png)", re.IGNORECASE) # TODO: Add capture group 4?!
