@@ -26,6 +26,7 @@ include = [
 [tool.poetry.dependencies]
 python = "~3.11"
 pillow = "~10.3"
+natsort = "^8.4.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"

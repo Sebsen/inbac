@@ -2,6 +2,7 @@ from fractions import Fraction
 import itertools
 import mimetypes
 import os
+from natsort import os_sorted
 
 import re
 from typing import Optional, List, Tuple
@@ -14,7 +15,7 @@ from inbac.view import View
 DEFAULT_GAP_SIZE: int = 100
 IMAGE_FILE_EXTENSIONS = ('.jpg', '.jpeg', '.png')
 # Regular expression to match the filename structure of cropped images
-CROPPED_IMAGE_PATTERN = re.compile(r"(.*_crop)(\d+)(.*\.)(jpg|jpeg|png)", re.IGNORECASE)
+CROPPED_IMAGE_PATTERN = re.compile(r"(.*_crop)(\d+)(.*)(.jpg|.jpeg|.png)", re.IGNORECASE)
 
 class Controller():
     def __init__(self, model: Model):
@@ -568,11 +569,28 @@ class Controller():
         files_dict = Controller.collect_cropped_files(directory, process_all=process_all)
 
         # Process each group of files
+        failed_renamings = {}
         for base_name, files in files_dict.items():
 
             # Rename files forward to remove gaps (forward direction to avoid possible conflicts!)
             for new_index, (_, suffix, extension, old_filename) in enumerate(files, start=1):
-                Controller.rename_file(directory, old_filename, base_name, new_index, suffix, extension)
+                try:
+                    Controller.rename_file(directory, old_filename, base_name, new_index, suffix, extension)
+                except FileExistsError:
+                    # File exists -> collision:
+                    #  => Collect planned renaming and perform later, once blocking file is renamed as well
+                    new_base_name = f"tmp_{base_name}"
+                    new_filename = Controller.rename_file(directory, old_filename, new_base_name, new_index, suffix, extension)
+                    failed_renamings[new_filename] = f"{base_name}{new_index}{extension}"
+
+
+        # Finally rename files to real filename which failed earlier due to temporary filename collisions
+        #  -> now all files should be renamed so that collisions won't occur anymore!
+        for tmp_filename, real_filename in failed_renamings.items():
+            old_filepath = os.path.join(directory, tmp_filename)
+            new_filepath = os.path.join(directory, real_filename)
+            if old_filename != new_filename:
+                os.rename(old_filepath, new_filepath)
 
 
     @staticmethod
@@ -615,10 +633,10 @@ class Controller():
         # Dictionary to hold filenames by their base name
         files_dict = {}
         
-        # List all image files in the directory with their modification times
+        # List all image files in the directory *as per operating system order* => very important for keeping correct order of files and not mixing!!
         files = [
             filename
-            for filename in sorted(os.listdir(directory))
+            for filename in os_sorted(os.listdir(directory))    # sorting according to the operating system!
             if filename.lower().endswith(extensions) and CROPPED_IMAGE_PATTERN.match(filename)
         ]
         
@@ -649,9 +667,11 @@ class Controller():
 
 
     @staticmethod
-    def rename_file(directory: str, old_filename: str, base_name: str, new_index: int, suffix: str, extension: str):
-        new_filename = f"{base_name}{new_index}{suffix}{extension}" # TODO: Remove suffix from new name?
+    def rename_file(directory: str, old_filename: str, base_name: str, new_index: int, suffix: str, extension: str) -> str:
+        new_filename = f"{base_name}{new_index}{extension}"
         old_filepath = os.path.join(directory, old_filename)
         new_filepath = os.path.join(directory, new_filename)
         if old_filename != new_filename:
             os.rename(old_filepath, new_filepath)
+            return new_filename
+        return None
