@@ -654,12 +654,12 @@ class Controller():
 
     @staticmethod
     def sort_cropped_files(files: list[str]):
-        # FIXME: Defined sort order not working as expected:
-        #        -> Files without suffix should be sorted first, but aren't
         # Custom comparison function to sort suffixes naturally
         def natural_sort_key(item):
             crop_number, suffix, extension, filename = item
-            return (crop_number, suffix or '')
+            # Treat a suffix of '.' as an empty suffix
+            normalized_suffix = '' if suffix == '.' else suffix or ''
+            return (crop_number, normalized_suffix)
 
         # Sort files by crop number and suffix using the custom sort key
         files.sort(key=natural_sort_key)
