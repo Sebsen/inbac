@@ -629,27 +629,25 @@ class Controller():
         files_dict = {}
         
         # List all image files in the directory with their modification times
-        files_with_times = [
-            (filename, os.path.getmtime(os.path.join(directory, filename)))
+        files = [
+            filename
             for filename in os.listdir(directory)
-            if filename.lower().endswith(extensions)
+            if filename.lower().endswith(extensions) and CROPPED_IMAGE_PATTERN.match(filename)
         ]
         
         # Sort files by modification time to find the newest file
-        files_with_times.sort(key=lambda x: x[1])
+        files.sort()
 
-        # FIXME: Not real modification time shall be considered (which may change), but latest file according to natural file name (-> like the main inbac tool already
-        #        does for image editing)
         # If not processing all, select only the last file based on modification time
         latest_file_base_name=None
-        if not process_all and files_with_times:
-            newest_file_tuple = files_with_times[-1]
-            match = CROPPED_IMAGE_PATTERN.match(newest_file_tuple[0])
+        if not process_all and files:
+            newest_file = files[-1]
+            match = CROPPED_IMAGE_PATTERN.match(newest_file)
             if match:
                 latest_file_base_name = match.group(1)
         
         # Extract and categorize files based on the regular expression (-> create files_dict)
-        for filename, _ in files_with_times:
+        for filename in files:
             match = CROPPED_IMAGE_PATTERN.match(filename)
             if match:
                 base_name = match.group(1)
