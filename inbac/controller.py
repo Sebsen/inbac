@@ -596,7 +596,6 @@ class Controller():
 
 
     @staticmethod
-    # FIXME: Analyze: When "insert gaps += 1" is apllied twice it only takes effect once => why?!
     def insert_filename_gaps(directory, gap_after, gap_size=DEFAULT_GAP_SIZE):
         """
         Introduces gaps of the specified gap_size (default=100) to the filenames after the specified index. Can only be performed for latest file
@@ -623,10 +622,11 @@ class Controller():
             for i in range(len(files)-1, -1, -1):
                 crop_number, suffix, extension, old_filename = files[i]
                 if gap_after is not None and crop_number > gap_after:
-                    new_index = i + 1 + gap_size
+                    new_crop_number = crop_number + gap_size
                 else:
-                    new_index = i + 1
-                Controller.rename_file(directory, old_filename, base_name, new_index, extension)
+                    # Exit -> Since file list is sorted won't find a higher crop number to raise & rename
+                    break
+                Controller.rename_file(directory, old_filename, base_name, new_crop_number, extension)
 
 
     @staticmethod
