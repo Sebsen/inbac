@@ -575,12 +575,12 @@ class Controller():
             # Rename files forward to remove gaps (forward direction to avoid possible conflicts!)
             for new_index, (_, suffix, extension, old_filename) in enumerate(files, start=1):
                 try:
-                    Controller.rename_file(directory, old_filename, base_name, new_index, suffix, extension)
+                    Controller.rename_file(directory, old_filename, base_name, new_index, extension)
                 except FileExistsError:
                     # File exists -> collision:
                     #  => Collect planned renaming and perform later, once blocking file is renamed as well
                     new_base_name = f"tmp_{base_name}"
-                    new_filename = Controller.rename_file(directory, old_filename, new_base_name, new_index, suffix, extension)
+                    new_filename = Controller.rename_file(directory, old_filename, new_base_name, new_index, extension)
                     failed_renamings[new_filename] = f"{base_name}{new_index}{extension}"
 
 
@@ -624,11 +624,11 @@ class Controller():
                     new_index = i + 1 + gap_size
                 else:
                     new_index = i + 1
-                Controller.rename_file(directory, old_filename, base_name, new_index, suffix, extension)
+                Controller.rename_file(directory, old_filename, base_name, new_index, extension)
 
 
     @staticmethod
-    def collect_cropped_files(directory:str, process_all: bool=True, extensions: list[str]=IMAGE_FILE_EXTENSIONS) -> dict[str, list[(str, str, str, str)]]:
+    def collect_cropped_files(directory:str, process_all: bool=True, extensions: list[str]=IMAGE_FILE_EXTENSIONS) -> dict[str, list[(int, str, str, str)]]:
         
         # Dictionary to hold filenames by their base name
         files_dict = {}
@@ -667,7 +667,7 @@ class Controller():
 
 
     @staticmethod
-    def rename_file(directory: str, old_filename: str, base_name: str, new_index: int, suffix: str, extension: str) -> str:
+    def rename_file(directory: str, old_filename: str, base_name: str, new_index: int, extension: str) -> str:
         new_filename = f"{base_name}{new_index}{extension}"
         old_filepath = os.path.join(directory, old_filename)
         new_filepath = os.path.join(directory, new_filename)
