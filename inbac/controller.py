@@ -16,6 +16,8 @@ DEFAULT_GAP_SIZE: int = 100
 IMAGE_FILE_EXTENSIONS = ('.jpg', '.jpeg', '.png')
 # Regular expression to match the filename structure of cropped images
 CROPPED_IMAGE_PATTERN = re.compile(r"(.*_crop)(\d+)(.*)(.jpg|.jpeg|.png)", re.IGNORECASE)
+# Prefix used to temporarily assign a file a unique name, before renaming to real file name in case of collisions wile removing gaps in the filename (cropXX) sequence numbers
+TMP_FILENAME_PREFIX="tmp_"
 
 class Controller():
     def __init__(self, model: Model):
@@ -579,9 +581,9 @@ class Controller():
                 except FileExistsError:
                     # File exists -> collision:
                     #  => Collect planned renaming and perform later, once blocking file is renamed as well
-                    new_base_name = f"tmp_{base_name}"
+                    new_base_name = f"{TMP_FILENAME_PREFIX}{base_name}"
                     new_filename = Controller.rename_file(directory, old_filename, new_base_name, new_index, extension)
-                    failed_renamings[new_filename] = f"{base_name}{new_index}{extension}"
+                    failed_renamings[new_filename] = new_filename.replace(TMP_FILENAME_PREFIX, '')
 
 
         # Finally rename files to real filename which failed earlier due to temporary filename collisions
