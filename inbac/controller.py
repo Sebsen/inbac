@@ -570,8 +570,6 @@ class Controller():
         # Process each group of files
         for base_name, files in files_dict.items():
 
-            Controller.sort_cropped_files(files)
-
             # Rename files forward to remove gaps (forward direction to avoid possible conflicts!)
             for new_index, (_, suffix, extension, old_filename) in enumerate(files, start=1):
                 Controller.rename_file(directory, old_filename, base_name, new_index, suffix, extension)
@@ -600,8 +598,6 @@ class Controller():
 
         # Process each group of files
         for base_name, files in files_dict.items():
-
-            Controller.sort_cropped_files(files)
 
             # Rename files to close the gaps or introduce the new gaps (backward to avoid conflicts)
             for i in range(len(files)-1, -1, -1):
@@ -650,19 +646,6 @@ class Controller():
                     files_dict[base_name].append((crop_number, suffix, extension, filename))
         
         return files_dict
-
-
-    @staticmethod
-    def sort_cropped_files(files: list[str]):
-        # Custom comparison function to sort suffixes naturally
-        def natural_sort_key(item):
-            crop_number, suffix, extension, filename = item
-            # Treat a suffix of '.' as an empty suffix
-            normalized_suffix = '' if suffix == '.' else suffix or ''
-            return (crop_number, normalized_suffix)
-
-        # Sort files by crop number and suffix using the custom sort key
-        files.sort(key=natural_sort_key)
 
 
     @staticmethod
