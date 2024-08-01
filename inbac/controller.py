@@ -557,18 +557,13 @@ class Controller():
                                                                                 displayed_image_size[0]), int(selected_box[3] *
                                                                                                               original_image_size[1] /
                                                                                                               displayed_image_size[1]))
-    @staticmethod
-    def fill_filename_gaps(directory, process_all=True, gap_after=None, gap_size=DEFAULT_GAP_SIZE):
-        """
-        Has two purposes:
-            1. Removes the sequence number gaps in filenames of image files containing the "_crop" identifier. Can be performed for all files
-                of the current directory or only the newest one
-            2. Introduces gaps of the specified gap_size (default=6) to the filenames after the specified index. Can only be performed for latest
-                file
-        """
 
-        if gap_size is None or gap_size < 1:
-            gap_size = DEFAULT_GAP_SIZE
+    @staticmethod
+    def remove_filename_gaps(directory, process_all=True):
+        """
+        Removes the sequence number gaps in filenames of image files containing the "_crop" identifier. Can be performed for all files
+        of the current directory or only the newest one
+        """
 
         files_dict = Controller.collect_cropped_files(directory, process_all=process_all)
 
@@ -577,16 +572,46 @@ class Controller():
             crop_number, suffix, extension, filename = item
             return (crop_number, suffix or '')
         
-        if gap_after is not None and len(files_dict) > 1:
-            raise Exception("Invalid amount of files -> invalid arguments to function! Only in latest file gaps can be introduced!")
-
         # Process each group of files
         for base_name, files in files_dict.items():
             # Sort files by crop number and suffix using the custom sort key
             files.sort(key=natural_sort_key)
 
-            # FIXME: If gap is in middle and e.g. pos=6 and there's existing crop8 and crop9 still issue is occurring
-            #        => Insert gaps backwards and remove gaps forward direction?!
+            # Rename files forward to remove gaps (forward direction to avoid possible conflicts!)
+            for new_index, (_, suffix, extension, old_filename) in enumerate(files, start=1):
+                Controller.rename_file(directory, old_filename, base_name, new_index, suffix, extension)
+
+
+    @staticmethod
+    def insert_filename_gaps(directory, gap_after, gap_size=DEFAULT_GAP_SIZE):
+        """
+        Introduces gaps of the specified gap_size (default=100) to the filenames after the specified index. Can only be performed for latest file
+        """
+
+        # Validate arguments
+        if gap_after is None or gap_after < 1:
+            raise Exception("gap_after argument is required!")
+
+        if gap_size is None or gap_size < 1:
+            gap_size = DEFAULT_GAP_SIZE
+
+
+        # Start processing
+        files_dict = Controller.collect_cropped_files(directory, process_all=False)
+
+        if len(files_dict) > 1:
+            raise Exception("Invalid amount of files -> Only in latest file gaps can be introduced!")
+
+        # Custom comparison function to sort suffixes naturally
+        def natural_sort_key(item):
+            crop_number, suffix, extension, filename = item
+            return (crop_number, suffix or '')
+        
+        # Process each group of files
+        for base_name, files in files_dict.items():
+            # Sort files by crop number and suffix using the custom sort key
+            files.sort(key=natural_sort_key)
+
             # Rename files to close the gaps or introduce the new gaps (backward to avoid conflicts)
             for i in range(len(files)-1, -1, -1):
                 crop_number, suffix, extension, old_filename = files[i]
@@ -598,7 +623,7 @@ class Controller():
 
 
     @staticmethod
-    def collect_cropped_files(directory:str, process_all: bool=True, extensions: list[str]=IMAGE_FILE_EXTENSIONS) -> dict[str, list[str]]:
+    def collect_cropped_files(directory:str, process_all: bool=True, extensions: list[str]=IMAGE_FILE_EXTENSIONS) -> dict[str, list[(str, str, str, str)]]:
         
         # Dictionary to hold filenames by their base name
         files_dict = {}

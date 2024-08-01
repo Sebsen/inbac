@@ -213,10 +213,10 @@ class View():
         messagebox.showinfo("About", "inbac " + inbac.__version__, parent=self.master)
     
     def remove_gaps_latest(self):
-        self.controller.fill_filename_gaps(self.controller.model.args.output_dir, process_all=False)
+        self.controller.remove_filename_gaps(self.controller.model.args.output_dir, process_all=False)
     
     def remove_gaps_all(self):
-        self.controller.fill_filename_gaps(self.controller.model.args.output_dir)
+        self.controller.remove_filename_gaps(self.controller.model.args.output_dir)
     
     def show_filename_gaps_window(self):
         insert_gaps_window = tk.Toplevel(self.master)
@@ -274,7 +274,7 @@ class View():
         apply_button = tk.Button(
             insert_gaps_window,
             text="Insert Gaps",
-            command=lambda: self.insert_gaps(settings)
+            command=lambda: self.insert_filename_gaps(settings)
             )
         apply_button.grid(row=10, column=0, padx=5, pady=15)
 
@@ -287,7 +287,7 @@ class View():
         insert_gaps_window.focus()
 
 
-    def insert_gaps(self, settings: types.SimpleNamespace):
+    def insert_filename_gaps(self, settings: types.SimpleNamespace):
         gap_index = settings.gap_index.get()
         if gap_index is not None and gap_index < 1:
             # No valid index - return
@@ -296,10 +296,9 @@ class View():
         gap_size = settings.gap_size.get()
         
         # Actually insert the gaps
-        self.controller.fill_filename_gaps(
+        self.controller.insert_filename_gaps(
             self.controller.model.args.output_dir,
-            process_all = False,
-            gap_after = gap_index,
+            gap_index,
             gap_size = gap_size
         )
 
