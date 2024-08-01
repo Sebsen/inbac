@@ -435,7 +435,7 @@ class Controller():
     def load_image_list(directory: str) -> List[str]:
         images: List[str] = []
 
-        for filename in sorted(os.listdir(directory)):
+        for filename in os_sorted(os.listdir(directory)):
             filetype, _ = mimetypes.guess_type(filename)
             if filetype is None or filetype.split("/")[0] != "image":
                 continue
