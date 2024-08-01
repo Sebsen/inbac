@@ -12,6 +12,9 @@ from inbac.model import Model
 from inbac.view import View
 
 DEFAULT_GAP_SIZE: int = 100
+IMAGE_FILE_EXTENSIONS = ('.jpg', '.jpeg', '.png')
+# Regular expression to match the filename structure of cropped images
+CROPPED_IMAGE_PATTERN = re.compile(r"(.*_crop)(\d+)(.*\.)(jpg|jpeg|png)", re.IGNORECASE) # TODO: Add capture group 4?!
 
 class Controller():
     def __init__(self, model: Model):
@@ -567,46 +570,8 @@ class Controller():
         if gap_size is None or gap_size < 1:
             gap_size = DEFAULT_GAP_SIZE
 
-        # Regular expression to match the filename structure
-        pattern = re.compile(r"(.*_crop)(\d+)(.*\.)(jpg|jpeg|png)", re.IGNORECASE) # TODO: Add capture group 4?!
-        valid_extensions = ('.jpg', '.jpeg', '.png')
-        
-        # Dictionary to hold filenames by their base name
-        files_dict = {}
-        
-        # List all image files in the directory with their modification times
-        files_with_times = [
-            (filename, os.path.getmtime(os.path.join(directory, filename)))
-            for filename in os.listdir(directory)
-            if filename.lower().endswith(valid_extensions)
-        ]
-        
-        # Sort files by modification time to find the newest file
-        files_with_times.sort(key=lambda x: x[1])
-        
-        # If not processing all, select only the last file based on modification time
-        latest_file_base_name=None
-        if not process_all and files_with_times:
-            newest_file_tuple = files_with_times[-1]
-            match = pattern.match(newest_file_tuple[0])
-            if match:
-                latest_file_base_name = match.group(1)
-        
-        # Extract and categorize files based on the regular expression (-> create files_dict)
-        for filename, _ in files_with_times:
-            match = pattern.match(filename)
-            if match:
-                base_name = match.group(1)
-                crop_number = int(match.group(2))
-                suffix = match.group(3)
-                extension = match.group(4)
-                # Only continue processing/ collecting files, when they match the latest file's base name (in case process_all=False provided)
-                if latest_file_base_name is None or base_name == latest_file_base_name:
-                    if base_name not in files_dict:
-                        # Only add key once to dict
-                        files_dict[base_name] = []
-                    files_dict[base_name].append((crop_number, suffix, extension, filename))
-        
+        files_dict = Controller.collect_cropped_files(directory, process_all=process_all)
+
         # Custom comparison function to sort suffixes naturally
         def natural_sort_key(item):
             crop_number, suffix, extension, filename = item
@@ -629,8 +594,57 @@ class Controller():
                     new_index = i + 1 + gap_size
                 else:
                     new_index = i + 1
-                new_filename = f"{base_name}{new_index}{suffix}{extension}" # TODO: Remove suffix from new name?
-                old_filepath = os.path.join(directory, old_filename)
-                new_filepath = os.path.join(directory, new_filename)
-                if old_filename != new_filename:
-                    os.rename(old_filepath, new_filepath)
+                Controller.rename_file(directory, old_filename, base_name, new_index, suffix, extension)
+
+
+    @staticmethod
+    def collect_cropped_files(directory:str, process_all: bool=True, extensions: list[str]=IMAGE_FILE_EXTENSIONS) -> dict[str, list[str]]:
+        
+        # Dictionary to hold filenames by their base name
+        files_dict = {}
+        
+        # List all image files in the directory with their modification times
+        files_with_times = [
+            (filename, os.path.getmtime(os.path.join(directory, filename)))
+            for filename in os.listdir(directory)
+            if filename.lower().endswith(extensions)
+        ]
+        
+        # Sort files by modification time to find the newest file
+        files_with_times.sort(key=lambda x: x[1])
+
+        # FIXME: Not real modification time shall be considered (which may change), but latest file according to natural file name (-> like the main inbac tool already
+        #        does for image editing)
+        # If not processing all, select only the last file based on modification time
+        latest_file_base_name=None
+        if not process_all and files_with_times:
+            newest_file_tuple = files_with_times[-1]
+            match = CROPPED_IMAGE_PATTERN.match(newest_file_tuple[0])
+            if match:
+                latest_file_base_name = match.group(1)
+        
+        # Extract and categorize files based on the regular expression (-> create files_dict)
+        for filename, _ in files_with_times:
+            match = CROPPED_IMAGE_PATTERN.match(filename)
+            if match:
+                base_name = match.group(1)
+                crop_number = int(match.group(2))
+                suffix = match.group(3)
+                extension = match.group(4)
+                # Only continue processing/ collecting files, when they match the latest file's base name (in case process_all=False provided)
+                if latest_file_base_name is None or base_name == latest_file_base_name:
+                    if base_name not in files_dict:
+                        # Only add key once to dict
+                        files_dict[base_name] = []
+                    files_dict[base_name].append((crop_number, suffix, extension, filename))
+        
+        return files_dict
+
+
+    @staticmethod
+    def rename_file(directory: str, old_filename: str, base_name: str, new_index: int, suffix: str, extension: str):
+        new_filename = f"{base_name}{new_index}{suffix}{extension}" # TODO: Remove suffix from new name?
+        old_filepath = os.path.join(directory, old_filename)
+        new_filepath = os.path.join(directory, new_filename)
+        if old_filename != new_filename:
+            os.rename(old_filepath, new_filepath)
