@@ -631,13 +631,10 @@ class Controller():
         # List all image files in the directory with their modification times
         files = [
             filename
-            for filename in os.listdir(directory)
+            for filename in sorted(os.listdir(directory))
             if filename.lower().endswith(extensions) and CROPPED_IMAGE_PATTERN.match(filename)
         ]
         
-        # Sort files by modification time to find the newest file
-        files.sort()
-
         # If not processing all, select only the last file based on modification time
         latest_file_base_name=None
         if not process_all and files:
