@@ -14,7 +14,7 @@ from inbac.view import View
 DEFAULT_GAP_SIZE: int = 100
 IMAGE_FILE_EXTENSIONS = ('.jpg', '.jpeg', '.png')
 # Regular expression to match the filename structure of cropped images
-CROPPED_IMAGE_PATTERN = re.compile(r"(.*_crop)(\d+)(.*\.)(jpg|jpeg|png)", re.IGNORECASE) # TODO: Add capture group 4?!
+CROPPED_IMAGE_PATTERN = re.compile(r"(.*_crop)(\d+)(.*\.)(jpg|jpeg|png)", re.IGNORECASE)
 
 class Controller():
     def __init__(self, model: Model):
