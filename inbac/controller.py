@@ -578,6 +578,7 @@ class Controller():
 
 
     @staticmethod
+    # FIXME: Analyze: When "insert gaps += 1" is apllied twice it only takes effect once => why?!
     def insert_filename_gaps(directory, gap_after, gap_size=DEFAULT_GAP_SIZE):
         """
         Introduces gaps of the specified gap_size (default=100) to the filenames after the specified index. Can only be performed for latest file
