@@ -43,6 +43,9 @@ class View():
         # Get the selection box cleared from canvas when pressing escape
         self.master.bind('<Escape>', self.on_escape)
 
+        # Toggle preview mode of images -> changing overly style (dotted vs solid)
+        self.master.bind('<Tab>', self.on_tab)
+
         self.master.bind('<KeyPress-Shift_L>', self.enable_selection_mode)
         self.master.bind('<KeyPress-Control_L>', self.enable_selection_mode)
         self.master.bind('<KeyRelease-Shift_L>', self.disable_selection_mode)
@@ -328,6 +331,9 @@ class View():
     def change_canvas_overlay_coords(self, obj: Any, coords: Tuple[int, int, int, int]):
         self.image_canvas.coords(obj, coords[0], coords[1], coords[2], coords[3])
 
+    def update_canvas_object(self, obj: Any, **kwargs):
+        self.image_canvas.itemconfig(obj, **kwargs)
+
     def get_canvas_object_coords(self, obj: Any) -> Any:
         return self.image_canvas.coords(obj)
     
@@ -371,6 +377,11 @@ class View():
 
     def on_escape(self, event: Event):
         self.controller.clear_selection_box()
+
+    def on_tab(self, event: Event):
+        new_stipple = "gray25" if self.controller.model.overlay_stipple == "" else ""
+        self.controller.model.overlay_stipple = new_stipple
+        self.controller.update_overlay_style()
 
     def next_image(self, event: Event = None):
         self.controller.next_image()

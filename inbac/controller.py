@@ -376,11 +376,13 @@ class Controller():
         if self.model.overlay_right:
             self.view.remove_from_canvas(self.model.overlay_right)
 
+        stipple = self.model.overlay_stipple
+
         image_dimensions = self.model.canvas_image_dimensions
-        self.model.overlay_top = self.view.create_overlay((0, 0, image_dimensions[0], 0))
-        self.model.overlay_bottom = self.view.create_overlay((0, image_dimensions[1], image_dimensions[0], image_dimensions[1]))
-        self.model.overlay_left = self.view.create_overlay((0, 0, 0, image_dimensions[1]))
-        self.model.overlay_right = self.view.create_overlay((image_dimensions[0], 0, image_dimensions[0], image_dimensions[1]))
+        self.model.overlay_top = self.view.create_overlay((0, 0, image_dimensions[0], 0), stipple=stipple)
+        self.model.overlay_bottom = self.view.create_overlay((0, image_dimensions[1], image_dimensions[0], image_dimensions[1]), stipple=stipple)
+        self.model.overlay_left = self.view.create_overlay((0, 0, 0, image_dimensions[1]), stipple=stipple)
+        self.model.overlay_right = self.view.create_overlay((image_dimensions[0], 0, image_dimensions[0], image_dimensions[1]), stipple=stipple)
 
     def update_overlays(self, left_x, top_y, right_x, bottom_y):
         image_dimensions = self.model.canvas_image_dimensions
@@ -388,6 +390,17 @@ class Controller():
         self.view.change_canvas_overlay_coords(self.model.overlay_bottom, (0, bottom_y, image_dimensions[0], image_dimensions[1]))
         self.view.change_canvas_overlay_coords(self.model.overlay_left, (0, top_y, left_x, bottom_y))
         self.view.change_canvas_overlay_coords(self.model.overlay_right, (right_x, top_y, image_dimensions[0], bottom_y))
+
+        self.update_overlay_style()
+    
+
+    def update_overlay_style(self):
+        stipple = self.model.overlay_stipple
+
+        self.view.update_canvas_object(self.model.overlay_top, stipple=stipple)
+        self.view.update_canvas_object(self.model.overlay_bottom, stipple=stipple)
+        self.view.update_canvas_object(self.model.overlay_left, stipple=stipple)
+        self.view.update_canvas_object(self.model.overlay_right, stipple=stipple)
     
     # TODO: Add option to control display of golden ratio lines via args from CLI + checkbox on UI
     def update_golden_ratio_lines(self, left_x, top_y, right_x, bottom_y):

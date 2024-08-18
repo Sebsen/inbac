@@ -20,6 +20,7 @@ class Model():
         self.overlay_bottom: Optional[Any] = None
         self.overlay_left: Optional[Any] = None
         self.overlay_right: Optional[Any] = None
+        self.overlay_stipple: str = "gray25"
         self.enabled_selection_mode: bool = False
         self.default_scrolling_speed_in_px: int = 8
         self.smooth_scrolling_speed_in_px: int = 1
